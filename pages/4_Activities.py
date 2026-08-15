@@ -240,14 +240,20 @@ else:
         bg, fg, icon = TYPE_COLORS.get(act["type"], ("#F1F5F9", "#475569", "A"))
         contact    = act.get("contact_name") or "—"
         deal       = act.get("deal_title")   or "—"
-        due        = act.get("due_date")     or "—"
+        due_val    = act.get("due_date")
+        
+        if due_val:
+            due = due_val.isoformat() if isinstance(due_val, date) else str(due_val)
+        else:
+            due = "—"
 
         # Overdue check — pre-compute to avoid inline conditionals in f-string
         overdue = False
-        if not completed and act.get("due_date"):
+        if not completed and due_val:
             try:
-                overdue = date.fromisoformat(act["due_date"]) < date.today()
-            except ValueError:
+                d_obj = due_val if isinstance(due_val, date) else date.fromisoformat(str(due_val))
+                overdue = d_obj < date.today()
+            except (ValueError, TypeError):
                 pass
 
         # Pre-compute all style values
